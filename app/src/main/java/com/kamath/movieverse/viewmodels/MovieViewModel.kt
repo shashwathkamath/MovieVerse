@@ -37,15 +37,6 @@ class MovieViewModel @Inject constructor(
 
     private val _refreshLiked = MutableStateFlow(0)
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val likedMovies: Flow<PagingData<Movie>> = _refreshLiked.flatMapLatest {
-        movieRepository.getLikedMovies().cachedIn(viewModelScope)
-    }.shareIn(
-        scope = viewModelScope,
-        started = SharingStarted.Eagerly,
-        replay = 1
-    )
-
     private val _movieDetails = MutableStateFlow<MovieDetails?>(null)
     val movieDetails = _movieDetails.asStateFlow()
 
