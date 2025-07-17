@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import com.kamath.movieverse.models.db.MovieEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MovieDao {
@@ -19,6 +20,9 @@ interface MovieDao {
 
     @Query("DELETE FROM movies")
     suspend fun clearMovies()
+
+    @Query("SELECT * FROM movies WHERE id = :id")
+    suspend fun getMovieById(id: Int): MovieEntity?
 
     @Transaction
     suspend fun refreshMovies(movies:List<MovieEntity>){
@@ -33,7 +37,7 @@ interface MovieDao {
     fun getLikedMovies(): PagingSource<Int, MovieEntity>
 
     @Query("SELECT isLiked FROM movies WHERE id = :movieId")
-    suspend fun isMovieLiked(movieId: Int): Boolean?
+    fun isMovieLiked(movieId: Int): Flow<Boolean>
 
     @Query("UPDATE movies SET isLiked = 0")
     suspend fun clearLikes()

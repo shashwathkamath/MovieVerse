@@ -11,6 +11,7 @@ import com.kamath.movieverse.data.api.TmdbApi
 import com.kamath.movieverse.data.local.AppDatabase
 import com.kamath.movieverse.models.api.Movie
 import com.kamath.movieverse.models.api.MovieDetails
+import com.kamath.movieverse.models.db.MovieEntity
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -48,7 +49,7 @@ class MovieRepository @Inject constructor(
     }
 
     @OptIn(ExperimentalPagingApi::class)
-    val likedMovies: Flow<PagingData<Movie>> = Pager(
+    fun getLikedMovies(): Flow<PagingData<Movie>> = Pager(
         config = PagingConfig(pageSize = 20, enablePlaceholders = false),
         pagingSourceFactory = { database.movieDao().getLikedMovies() }
     ).flow
@@ -69,11 +70,15 @@ class MovieRepository @Inject constructor(
         database.movieDao().updateLikeStatus(movieId, isLiked)
     }
 
-    suspend fun isMovieLiked(movieId:Int):Boolean?{
-        return database.movieDao().isMovieLiked(movieId)
-    }
+    fun isMovieLiked(movieId:Int):Flow<Boolean> = database.movieDao().isMovieLiked(movieId)
 
     suspend fun clearLikedMovies(){
         database.movieDao().clearLikes()
+    }
+
+    suspend fun insertMovieIfNotExists(entity: MovieEntity) {
+        if (database.movieDao().getMovieById(entity.id) == null) {  // Add @Query("SELECT * FROM movies WHERE id = :id") suspend fun getMovieById(id: Int): MovieEntity? to DAO
+            database.movieDao().insertMovies(listOf(entity))
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.kamath.movieverse.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -57,7 +58,8 @@ fun MovieDetailsScreen(movieId: Int) {
             .fillMaxSize()
             .background(Color(0xFFFFFFF0))
             .verticalScroll(rememberScrollState())
-            .padding(16.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.SpaceEvenly
     ) {
        when{
            error != null -> Text("Error in loading")

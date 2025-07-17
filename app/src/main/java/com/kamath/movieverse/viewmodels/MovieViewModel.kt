@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -30,15 +29,21 @@ class MovieViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     val movies: Flow<PagingData<Movie>> = _timeWindow.flatMapLatest { window ->
         movieRepository.getMovies(window).cachedIn(viewModelScope)
-    }
-    val likedMovies: Flow<PagingData<Movie>> = movieRepository
-        .likedMovies
-        .cachedIn(viewModelScope)
-        .shareIn(
-            scope = viewModelScope,
-            started = SharingStarted.Companion.Eagerly,
-            replay = 1
-        )
+    }.shareIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        replay = 1
+    )
+
+    private val _refreshLiked = MutableStateFlow(0)
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val likedMovies: Flow<PagingData<Movie>> = _refreshLiked.flatMapLatest {
+        movieRepository.getLikedMovies().cachedIn(viewModelScope)
+    }.shareIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        replay = 1
+    )
 
     private val _movieDetails = MutableStateFlow<MovieDetails?>(null)
     val movieDetails = _movieDetails.asStateFlow()
@@ -65,16 +70,16 @@ class MovieViewModel @Inject constructor(
     fun toggleLike(movieId: Int, isLiked: Boolean) {
         viewModelScope.launch {
             movieRepository.toggleLike(movieId, isLiked)
+            _refreshLiked.value++  // Only refresh liked list
         }
     }
 
-    fun isLiked(movieId: Int): Flow<Boolean> = flow {
-        emit(movieRepository.isMovieLiked(movieId) ?: false)
-    }
+    fun isLiked(movieId: Int): Flow<Boolean> = movieRepository.isMovieLiked(movieId)
 
     fun clearLikedMovies(){
         viewModelScope.launch {
             movieRepository.clearLikedMovies()
+            _refreshLiked.value++
         }
     }
 }
