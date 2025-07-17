@@ -8,16 +8,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -28,12 +31,14 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.kamath.movieverse.ui.screens.components.MovieCard
 import com.kamath.movieverse.viewmodels.MovieViewModel
+import androidx.compose.runtime.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieListScreen(navController: NavController) {
     val viewModel: MovieViewModel = hiltViewModel()
     val movies = viewModel.movies.collectAsLazyPagingItems()
+    val selectedtimeWindow by viewModel.timeWindow.collectAsState()
 
     Scaffold(
         topBar = {
@@ -63,16 +68,22 @@ fun MovieListScreen(navController: NavController) {
                     text = "Most Popular",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.alignByBaseline()
+                    modifier = Modifier.weight(1f)
                 )
                 Row {
-                    Button(onClick = { viewModel.setWindow("day") }) {
-                        Text("Today")
-                    }
+                    FilterChip(
+                        selected = selectedtimeWindow == "day",
+                        onClick = { viewModel.setWindow("day") },
+                        label = { Text("Today", fontSize = 14.sp) },
+                        shape = RoundedCornerShape(16.dp)
+                    )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Button(onClick = { viewModel.setWindow("week")}) {
-                        Text("This week")
-                    }
+                    FilterChip(
+                        selected = selectedtimeWindow == "week",
+                        onClick = { viewModel.setWindow("week") },
+                        label = { Text("Week", fontSize = 14.sp) },
+                        shape = RoundedCornerShape(16.dp)
+                    )
                 }
             }
             when {
