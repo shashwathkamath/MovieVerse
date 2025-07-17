@@ -1,3 +1,4 @@
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -11,7 +12,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -21,7 +21,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,14 +33,13 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.kamath.movieverse.ui.screens.components.MovieCard
 import com.kamath.movieverse.viewmodels.MovieViewModel
-import androidx.compose.runtime.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieListScreen(navController: NavController) {
     val viewModel: MovieViewModel = hiltViewModel()
     val movies = viewModel.movies.collectAsLazyPagingItems()
-    val selectedtimeWindow by viewModel.timeWindow.collectAsState()
+    val selectedTimeWindow by viewModel.timeWindow.collectAsState()
 
     Scaffold(
         topBar = {
@@ -61,30 +62,29 @@ fun MovieListScreen(navController: NavController) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .background(Color(0xFFFFFFF0))
+                    .padding(horizontal = 16.dp, vertical = 6.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
                     text = "Most Popular",
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.weight(1f)
                 )
-                Row {
-                    FilterChip(
-                        selected = selectedtimeWindow == "day",
-                        onClick = { viewModel.setWindow("day") },
-                        label = { Text("Today", fontSize = 14.sp) },
-                        shape = RoundedCornerShape(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    FilterChip(
-                        selected = selectedtimeWindow == "week",
-                        onClick = { viewModel.setWindow("week") },
-                        label = { Text("Week", fontSize = 14.sp) },
-                        shape = RoundedCornerShape(16.dp)
-                    )
-                }
+                FilterChip(
+                    selected = selectedTimeWindow == "day",
+                    onClick = { viewModel.setWindow("day") },
+                    label = { Text("Today", fontSize = 14.sp) },
+                    shape = RoundedCornerShape(16.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                FilterChip(
+                    selected = selectedTimeWindow == "week",
+                    onClick = { viewModel.setWindow("week") },
+                    label = { Text("Week", fontSize = 14.sp) },
+                    shape = RoundedCornerShape(16.dp)
+                )
             }
             when {
                 movies.loadState.refresh is LoadState.Loading -> Text("Loading movies...")
