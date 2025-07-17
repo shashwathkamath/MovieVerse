@@ -1,5 +1,6 @@
 package com.kamath.movieverse.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,10 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -52,36 +55,45 @@ fun MovieDetailsScreen(movieId: Int) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color(0xFFFFFFF0))
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
        when{
            error != null -> Text("Error in loading")
            movieDetails!=null -> {
-               Box{
-                   AsyncImage(
-                       model = "https://image.tmdb.org/t/p/w500${movieDetails?.posterPath}",
-                       contentDescription = movieDetails?.title,
-                       modifier = Modifier
-                           .fillMaxWidth()
-                           .height(300.dp),
-                       contentScale = ContentScale.Crop
-                   )
-                   IconButton(
-                       onClick = {
-                           isFav = !isFav
-                           viewmodel.toggleLike(movieId,isFav)},
-                       modifier = Modifier
-                           .align(Alignment.TopEnd)
-                           .padding(8.dp)
-                           .clip(CircleShape)
-                           .size(32.dp)
-                   ) {
-                       Icon(
-                           imageVector = if (isFav) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                           contentDescription = "Favorite",
-                           tint = if (isFav) Color.Red else Color.Gray,
+               Card(
+                   shape = RoundedCornerShape(16.dp),
+                   modifier = Modifier
+                       .fillMaxWidth()
+                       .height(300.dp)
+               ) {
+                   Box {
+                       AsyncImage(
+                           model = "https://image.tmdb.org/t/p/w500${movieDetails?.posterPath}",
+                           contentDescription = movieDetails?.title,
+                           modifier = Modifier
+                               .fillMaxWidth()
+                               .height(300.dp),
+                           contentScale = ContentScale.Crop
                        )
+                       IconButton(
+                           onClick = {
+                               isFav = !isFav
+                               viewmodel.toggleLike(movieId, isFav)
+                           },
+                           modifier = Modifier
+                               .align(Alignment.TopEnd)
+                               .padding(8.dp)
+                               .clip(CircleShape)
+                               .size(32.dp)
+                       ) {
+                           Icon(
+                               imageVector = if (isFav) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                               contentDescription = "Favorite",
+                               tint = if (isFav) Color.Red else Color.Gray,
+                           )
+                       }
                    }
                }
                Spacer(modifier = Modifier.height(16.dp))

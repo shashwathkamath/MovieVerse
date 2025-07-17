@@ -25,13 +25,13 @@ class MovieRepository @Inject constructor(
 
 
     @OptIn(ExperimentalPagingApi::class)
-    val movies: Flow<PagingData<Movie>> = Pager(
+    fun getMovies(timeWindow: String): Flow<PagingData<Movie>> = Pager(
         config = PagingConfig(pageSize = 20, enablePlaceholders = false),
-        remoteMediator = MovieRemoteMediator(tmdbApi,database,API_KEY),
-        pagingSourceFactory = {database.movieDao().getMovies()}
+        remoteMediator = MovieRemoteMediator(tmdbApi, database, API_KEY, timeWindow),
+        pagingSourceFactory = { database.movieDao().getMovies() }
     ).flow
-        .map {pagingData ->
-            pagingData.map { entity->
+        .map { pagingData ->
+            pagingData.map { entity ->
                 Movie(
                     id = entity.id,
                     title = entity.title,

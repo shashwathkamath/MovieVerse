@@ -19,4 +19,11 @@ interface TmdbApi {
         @Path("movieId") movieId:Int,
         @Query("api_key")apiKey:String
     ):MovieDetails
+
+    @GET("3/trending/movie/{time_window}")
+    suspend fun getTrendingMovies(
+        @Path("time_window") timeWindow:String,
+        @Query("api_key")apiKey:String,
+        @Query("page") page: Int = 1,
+    ): MovieResponse
 }

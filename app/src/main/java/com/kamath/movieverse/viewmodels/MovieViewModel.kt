@@ -8,10 +8,12 @@ import com.kamath.movieverse.models.api.Movie
 import com.kamath.movieverse.models.api.MovieDetails
 import com.kamath.movieverse.repository.MovieRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
@@ -21,14 +23,14 @@ import javax.inject.Inject
 class MovieViewModel @Inject constructor(
     private val movieRepository: MovieRepository
 ): ViewModel() {
-    val movies: Flow<PagingData<Movie>> = movieRepository
-        .movies
-        .cachedIn(viewModelScope)
-        .shareIn(
-            scope = viewModelScope,
-            started = SharingStarted.Companion.Eagerly,
-            replay = 1
-        )
+
+    private val _timeWindow = MutableStateFlow("day")
+    val timeWindow = _timeWindow.asStateFlow()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val movies: Flow<PagingData<Movie>> = _timeWindow.flatMapLatest { window ->
+        movieRepository.getMovies(window).cachedIn(viewModelScope)
+    }
     val likedMovies: Flow<PagingData<Movie>> = movieRepository
         .likedMovies
         .cachedIn(viewModelScope)
@@ -54,6 +56,10 @@ class MovieViewModel @Inject constructor(
                 _error.value = "Failed to load movies: ${e.message}"
             }
         }
+    }
+
+    fun setWindow(window:String){
+        _timeWindow.value = window
     }
 
     fun toggleLike(movieId: Int, isLiked: Boolean) {

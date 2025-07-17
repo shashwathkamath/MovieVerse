@@ -1,5 +1,6 @@
 package com.kamath.movieverse.data
 
+import android.util.Log
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
@@ -15,7 +16,8 @@ import java.io.IOException
 class MovieRemoteMediator(
     private val tmdbApi: TmdbApi,
     private val database: AppDatabase,
-    private val apiKey: String
+    private val apiKey: String,
+    private val timeWindow: String
 ) : RemoteMediator<Int, MovieEntity>() {
 
     override suspend fun load(
@@ -27,13 +29,15 @@ class MovieRemoteMediator(
                 LoadType.REFRESH -> 1
                 LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
                 LoadType.APPEND -> {
-                    val lastPage = state.pages.lastOrNull { it.data.isNotEmpty() }?.data?.lastOrNull()?.pageId
+                    val lastPage =
+                        state.pages.lastOrNull { it.data.isNotEmpty() }?.data?.lastOrNull()?.pageId
                     if (lastPage == null) return MediatorResult.Success(endOfPaginationReached = true)
                     lastPage + 1
                 }
             }
 
-            val response = tmdbApi.getPopularMovies(apiKey, loadKey)
+            val response = tmdbApi.getTrendingMovies(timeWindow, apiKey, loadKey)
+            Log.d("Mediator", "load: ${response.results}")
             val movies = response.results.map { movie ->
                 MovieEntity(
                     id = movie.id,

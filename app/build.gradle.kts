@@ -103,4 +103,6 @@ dependencies {
 
     //hilt navigation
     implementation(libs.androidx.hilt.navigation.compose)
+
+    implementation(libs.logging.interceptor)
 }
