@@ -21,7 +21,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MovieViewModel @Inject constructor(
     private val movieRepository: MovieRepository
-): ViewModel() {
+) : ViewModel() {
 
     private val _timeWindow = MutableStateFlow("day")
     val timeWindow = _timeWindow.asStateFlow()
@@ -36,6 +36,7 @@ class MovieViewModel @Inject constructor(
     )
 
     private val _refreshLiked = MutableStateFlow(0)
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val likedMovies: Flow<PagingData<Movie>> = _refreshLiked.flatMapLatest {
         movieRepository.getLikedMovies().cachedIn(viewModelScope)
@@ -51,19 +52,18 @@ class MovieViewModel @Inject constructor(
     private val _error = MutableStateFlow<String?>(null)
     val error = _error.asStateFlow()
 
-    fun loadMovieDetails(movieId:Int){
+    fun loadMovieDetails(movieId: Int) {
         viewModelScope.launch {
             try {
                 val details = movieRepository.getMovieDetails(movieId)
                 _movieDetails.value = details
-            }
-            catch (e:Exception){
+            } catch (e: Exception) {
                 _error.value = "Failed to load movies: ${e.message}"
             }
         }
     }
 
-    fun setWindow(window:String){
+    fun setWindow(window: String) {
         _timeWindow.value = window
     }
 
@@ -76,10 +76,4 @@ class MovieViewModel @Inject constructor(
 
     fun isLiked(movieId: Int): Flow<Boolean> = movieRepository.isMovieLiked(movieId)
 
-    fun clearLikedMovies(){
-        viewModelScope.launch {
-            movieRepository.clearLikedMovies()
-            _refreshLiked.value++
-        }
-    }
 }

@@ -24,20 +24,21 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.kamath.movieverse.ui.screens.components.LikedMovieCard
-import com.kamath.movieverse.viewmodels.MovieViewModel
+import com.kamath.movieverse.viewmodels.LikedMoviesViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieLikedScreen(navController: NavController) {
-    val viewmodel: MovieViewModel = hiltViewModel()
+    val viewmodel: LikedMoviesViewModel = hiltViewModel()
     val likedMovies = viewmodel.likedMovies.collectAsLazyPagingItems()
     val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Favorites", fontWeight = FontWeight.Bold) },)
+                title = { Text("Favorites", fontWeight = FontWeight.Bold) },
+            )
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -69,8 +70,8 @@ fun MovieLikedScreen(navController: NavController) {
                     LikedMovieCard(
                         imageUrl = "https://image.tmdb.org/t/p/w500${movie.posterPath}",
                         title = movie.title,
-                        onClick = { navController.navigate("movie_details/${movie.id}") }
-                    )
+                        onClick = { navController.navigate("movie_details/${movie.id}") },
+                        onDelete = { viewmodel.deleteMovie(movie.id) })
                 }
             }
         }
